@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './Onboarding.css';
 
-import Onbording1 from '../Onbording1.png';
-import Onbording2 from '../Onbording2.png';
-import Onbording3 from '../Onbording3.png';
-import Onbording4 from '../Onbording4.png';
+import Onbording1 from '/Onbording1.png';
+import Onbording2 from '/Onbording2.png';
+import Onbording3 from '/Onbording3.png';
+import Onbording4 from '/Onbording4.png';
 
 const screens = [
   {
