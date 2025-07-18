@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Onboarding.css';
-
-import Onbording1 from '/Onbording1.png';
-import Onbording2 from '/Onbording2.png';
-import Onbording3 from '/Onbording3.png';
-import Onbording4 from '/Onbording4.png';
 
 const screens = [
   {
@@ -12,30 +8,31 @@ const screens = [
     tagline: 'Trusted Guardian of Life',
     autoNext: true,
     duration: 2000,
-    bg: Onbording1,
+    bg: '/Onbording1.png',
   },
   {
     title: 'Your Health, Our Priority',
     subheading: 'Trust doctors and care at door step',
     buttons: ['Skip', 'Next'],
-    bg: Onbording2,
+    bg: '/Onbording2.png',
   },
   {
     title: 'Seamless Care, Delivered',
     subheading: 'Consult, treat, and heal—hassle-free',
     buttons: ['Skip', 'Next'],
-    bg: Onbording3,
+    bg: '/Onbording3.png',
   },
   {
     title: 'Affordable Healthcare for Everyone',
     subheading: 'Quality care for every budget',
     buttons: ['Get Started'],
-    bg: Onbording4,
+    bg: '/Onbording4.png',
   },
 ];
 
 const Onboarding: React.FC = () => {
   const [screenIdx, setScreenIdx] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (screens[screenIdx].autoNext) {
@@ -51,6 +48,7 @@ const Onboarding: React.FC = () => {
       setScreenIdx(screenIdx + 1);
     } else if (btn === 'Get Started') {
       localStorage.setItem('onboardingComplete', 'true');
+      navigate('/welcome');
     }
   };
 

@@ -55,18 +55,49 @@
 
 .onboarding-buttons {
   margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .onboarding-button {
-  margin: 0 1rem;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 25px;
   cursor: pointer;
-  background: #1976d2;
+  background: #2563eb;
   color: #fff;
   border: none;
-  box-shadow: 0 2px 8px #0003;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0;
+  min-width: 100px;
+}
+
+.onboarding-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+}
+
+.onboarding-button:active {
+  transform: translateY(0);
+}
+
+.onboarding-button:first-child {
+  background: transparent;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.onboarding-button:first-child:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
 .onboarding-dots {
