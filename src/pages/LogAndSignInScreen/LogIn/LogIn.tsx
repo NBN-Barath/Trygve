@@ -1,25 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { setupRecaptcha, sendOtp, verifyOtp, cleanupRecaptcha } from '../../../firebase/auth';
+import type { ConfirmationResult } from 'firebase/auth';
+import { useAuth } from '../../../contexts/AuthContext';
 import './LogIn.css';
 
 const LogIn: React.FC = () => {
   const [step, setStep] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
-  const handleSendCode = () => {
-    if (phoneNumber.length >= 10) {
-      console.log('Sending code to:', '+91' + phoneNumber);
-      setStep(2);
+  useEffect(() => {
+    // Setup reCAPTCHA when component mounts
+    const initRecaptcha = () => {
+      try {
+        setupRecaptcha('login-recaptcha-container');
+      } catch (error) {
+        console.error('Error setting up reCAPTCHA:', error);
+      }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(initRecaptcha, 100);
+
+    return () => {
+      clearTimeout(timer);
+      // Cleanup reCAPTCHA when component unmounts
+      cleanupRecaptcha();
+    };
+  }, []);
+
+  // Format phone number with space after 5 digits
+  const formatPhoneNumber = (value: string) => {
+    const cleanedValue = value.replace(/\D/g, '');
+    if (cleanedValue.length > 5) {
+      return cleanedValue.slice(0, 5) + ' ' + cleanedValue.slice(5, 10);
+    }
+    return cleanedValue;
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length <= 10) {
+      setPhoneNumber(value);
     }
   };
 
-  const handleVerifyOTP = () => {
+  const handleSendCode = async () => {
+    if (phoneNumber.length >= 10) {
+      setLoading(true);
+      setError('');
+      try {
+        // Ensure reCAPTCHA is properly set up
+        const verifier = setupRecaptcha('login-recaptcha-container');
+        if (!verifier) {
+          throw new Error('Failed to initialize reCAPTCHA');
+        }
+        
+        const fullPhoneNumber = `+91${phoneNumber}`;
+        const result = await sendOtp(fullPhoneNumber, verifier);
+        setConfirmationResult(result);
+        setStep(2);
+      } catch (error: any) {
+        console.error('Error sending code:', error);
+        let errorMessage = 'Failed to send OTP';
+        
+        if (error.code === 'auth/invalid-phone-number') {
+          errorMessage = 'Invalid phone number format';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many attempts. Please try again later';
+        } else if (error.message.includes('reCAPTCHA')) {
+          errorMessage = 'reCAPTCHA verification failed. Please try again';
+        }
+        
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleVerifyOTP = async () => {
     const otpCode = otp.join('');
-    if (otpCode.length === 4) {
-      console.log('Verifying OTP:', otpCode);
-      setStep(3);
+    if (otpCode.length === 6 && confirmationResult) {
+      setLoading(true);
+      setError('');
+      try {
+        const user = await verifyOtp(confirmationResult, otpCode);
+        setUser(user);
+        setStep(3);
+      } catch (error: any) {
+        console.error('Error verifying OTP:', error);
+        setError(error.message || 'Failed to verify OTP');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -35,7 +115,7 @@ const LogIn: React.FC = () => {
       setOtp(newOtp);
       
       // Auto-focus next input
-      if (value && index < 3) {
+      if (value && index < 5) {
         const nextInput = document.getElementById(`login-otp-${index + 1}`);
         nextInput?.focus();
       }
@@ -63,17 +143,22 @@ const LogIn: React.FC = () => {
             <h1 className="login-title">OTP Verification</h1>
             <p className="login-subtitle">Enter verified user phone number to send OTP then Passcode</p>
             
+            {error && (
+              <div className="error-message" style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
+            
             <div className="phone-input-section">
-              <div className="phone-input-container">
+              <div className="phone-input-container compact">
                 <div className="country-code">
                   <span>🇮🇳 +91</span>
                 </div>
                 <input
                   type="tel"
                   className="phone-input"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  maxLength={10}
+                  value={formatPhoneNumber(phoneNumber)}
+                  onChange={handlePhoneNumberChange}
                 />
               </div>
             </div>
@@ -81,9 +166,9 @@ const LogIn: React.FC = () => {
             <button 
               className="btn btn-primary"
               onClick={handleSendCode}
-              disabled={phoneNumber.length < 10}
+              disabled={phoneNumber.length < 10 || loading}
             >
-              Continue
+              {loading ? 'Sending...' : 'Continue'}
             </button>
             
             <div className="signup-link">
@@ -102,6 +187,12 @@ const LogIn: React.FC = () => {
           <div className="login-content">
             <h1 className="login-title">Verification Code</h1>
             <p className="login-subtitle">We texted you the verification code to your entered number</p>
+            
+            {error && (
+              <div className="error-message" style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
             
             <div className="otp-input-section">
               <div className="otp-container">
@@ -122,9 +213,9 @@ const LogIn: React.FC = () => {
             <button 
               className="btn btn-primary"
               onClick={handleVerifyOTP}
-              disabled={otp.join('').length < 4}
+              disabled={otp.join('').length < 6 || loading}
             >
-              Continue
+              {loading ? 'Verifying...' : 'Continue'}
             </button>
           </div>
         );
@@ -154,8 +245,9 @@ const LogIn: React.FC = () => {
 
   return (
     <div className="login-container">
+      <div id="login-recaptcha-container" style={{ display: 'none' }}></div>
       <div className="login-background">
-        <img src="/LogAndSignInBG.png" alt="Background" className="logo-bg" />
+        <img src="/loginpage2.png" alt="Background" className="logo-bg" />
       </div>
       
       <button className="back-button" onClick={() => step > 1 ? setStep(step - 1) : navigate('/welcome')}>
