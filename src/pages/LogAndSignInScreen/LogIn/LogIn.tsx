@@ -96,7 +96,19 @@ const LogIn: React.FC = () => {
         setStep(3);
       } catch (error: any) {
         console.error('Error verifying OTP:', error);
-        setError(error.message || 'Failed to verify OTP');
+        let errorMessage = 'Failed to verify OTP';
+        
+        if (error.code === 'auth/invalid-verification-code') {
+          errorMessage = 'Invalid OTP';
+        } else if (error.code === 'auth/code-expired') {
+          errorMessage = 'OTP has expired. Please request a new one';
+        } else if (error.code === 'auth/session-expired') {
+          errorMessage = 'Session expired. Please try again';
+        } else if (error.message && error.message.includes('invalid')) {
+          errorMessage = 'Invalid OTP';
+        }
+        
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

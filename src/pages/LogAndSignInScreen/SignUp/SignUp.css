@@ -183,6 +183,19 @@
   transform: none;
 }
 
+.btn-secondary {
+  background: #f8f9fa;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.2);
+}
+
 .btn:active:not(:disabled) {
   transform: translateY(0);
 }
@@ -421,6 +434,56 @@
   color: #999;
 }
 
+/* Error state for form inputs */
+.form-input.error {
+  border-color: #ef4444;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+}
+
+.form-input.error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* Valid state for form inputs */
+.form-input.valid {
+  border-color: #10b981;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+}
+
+.form-input.valid:focus {
+  border-color: #059669;
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3);
+}
+
+/* Input group for validation */
+.input-group {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.input-group .form-input {
+  margin-bottom: 0.5rem;
+}
+
+/* Field-specific error messages */
+.field-error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+/* Field-specific success messages */
+.field-success-message {
+  color: #10b981;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
 /* Success screen */
 .success-content {
   text-align: center;
@@ -455,4 +518,27 @@
   color: #666;
   font-size: 0.9rem;
   margin-bottom: 2rem;
+}
+
+/* User info section for success page */
+.user-info {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
+}
+
+.user-info p {
+  margin: 0.5rem 0;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.user-info p strong {
+  color: #212529;
+  font-weight: 600;
 }
